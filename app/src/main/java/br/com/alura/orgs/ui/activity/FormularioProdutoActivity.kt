@@ -15,7 +15,10 @@ class FormularioProdutoActivity : AppCompatActivity() {
         ActivityFormularioProdutoBinding.inflate(layoutInflater)
     }
     private var url: String? = null
-    private var idProduto = 0L
+    private var produtoId = 0L
+    val produtoDao by lazy {
+        AppDataBase.instancia(this).produtoDao()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,33 +33,42 @@ class FormularioProdutoActivity : AppCompatActivity() {
                     binding.activityFormularioProdutoImagem.tentaCarregarImagem(url)
                 }
         }
+        tentaCarregarProduto()
+    }
 
-        intent.getParcelableExtra<Produto>(CHAVE_PRODUTO)?.let { produtoCarregado ->
-            title = "Alterar Produto"
-            idProduto = produtoCarregado.id
-            url = produtoCarregado.imagem
+    override fun onResume() {
+        super.onResume()
+        tentaBuscarProduto()
+    }
 
-            with(binding) {
-                activityFormularioProdutoImagem.tentaCarregarImagem(produtoCarregado.imagem)
-                activityFormularioProdutoNome.setText(produtoCarregado.nome)
-                activityFormularioProdutoDescricao.setText(produtoCarregado.descricao)
-                activityFormularioProdutoValor.setText(produtoCarregado.valor.toPlainString())
-            }
+    private fun tentaBuscarProduto() {
+        produtoDao.buscaById(produtoId)?.let {
+            preencheCampos(it)
+        }
+    }
+
+    private fun tentaCarregarProduto() {
+        produtoId = intent.getLongExtra(CHAVE_PRODUTO_ID, 0L)
+    }
+
+    private fun preencheCampos(produto: Produto) {
+        title = "Alterar Produto"
+        url = produto.imagem
+
+        with(binding) {
+            activityFormularioProdutoImagem.tentaCarregarImagem(produto.imagem)
+            activityFormularioProdutoNome.setText(produto.nome)
+            activityFormularioProdutoDescricao.setText(produto.descricao)
+            activityFormularioProdutoValor.setText(produto.valor.toPlainString())
         }
     }
 
     private fun configuraBotaoSalvar() {
         val botaoSalvar = binding.activityFormularioProdutoBotaoSalvar
-        val db = AppDataBase.instancia(this)
-        val produtoDao = db.produtoDao()
 
         botaoSalvar.setOnClickListener {
             val produtoNovo = criaProduto()
-            if (idProduto > 0) {
-                produtoDao.update(produtoNovo)
-            } else {
-                produtoDao.salvar(produtoNovo)
-            }
+            produtoDao.salvar(produtoNovo)
             finish()
         }
     }
@@ -75,7 +87,7 @@ class FormularioProdutoActivity : AppCompatActivity() {
         }
 
         return Produto(
-            id = idProduto,
+            id = produtoId,
             nome = nome,
             descricao = descricao,
             valor = valor,

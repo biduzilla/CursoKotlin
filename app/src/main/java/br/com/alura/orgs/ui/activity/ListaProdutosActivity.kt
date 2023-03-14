@@ -45,13 +45,14 @@ class ListaProdutosActivity : AppCompatActivity() {
         val recyclerView = binding.activityListaProdutosRecyclerView
         recyclerView.adapter = adapter
         adapter.quandoClicaNoItem = {
-            val intent = Intent(
+            Intent(
                 this,
                 DetalhesProdutoActivity::class.java
             ).apply {
-                putExtra(CHAVE_PRODUTO, it)
+                putExtra(CHAVE_PRODUTO_ID, it.id)
+                startActivity(this)
             }
-            startActivity(intent)
+
         }
     }
 

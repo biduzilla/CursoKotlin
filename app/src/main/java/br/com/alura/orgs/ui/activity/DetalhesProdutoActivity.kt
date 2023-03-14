@@ -17,7 +17,7 @@ import com.google.android.material.snackbar.Snackbar
 
 class DetalhesProdutoActivity : AppCompatActivity() {
 
-    private var produtoId: Long? = null
+    private var produtoId: Long = 0L
     private var produto: Produto? = null
     private val binding by lazy {
         ActivityDetalhesProdutoBinding.inflate(layoutInflater)
@@ -34,9 +34,11 @@ class DetalhesProdutoActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        produtoId?.let { id ->
-            produto = produtoDao.buscaById(id)
-        }
+        buscaProduto()
+    }
+
+    private fun buscaProduto() {
+        produto = produtoDao.buscaById(produtoId)
         produto?.let {
             preencheCampos(it)
         } ?: finish()
@@ -48,12 +50,10 @@ class DetalhesProdutoActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-
-
         when (item.itemId) {
             R.id.menu_editar -> {
                 Intent(this, FormularioProdutoActivity::class.java).apply {
-                    putExtra(CHAVE_PRODUTO, produto)
+                    putExtra(CHAVE_PRODUTO_ID, produtoId)
                     startActivity(this)
                 }
             }
@@ -61,19 +61,14 @@ class DetalhesProdutoActivity : AppCompatActivity() {
                 produto?.let {
                     produtoDao.remove(it)
                 }
-
                 finish()
             }
         }
-
-
         return super.onOptionsItemSelected(item)
     }
 
     private fun tentaCarregarProduto() {
-        intent.getParcelableExtra<Produto>(CHAVE_PRODUTO)?.let { produtoCarregado ->
-            produtoId = produtoCarregado.id
-        } ?: finish()
+        produtoId = intent.getLongExtra(CHAVE_PRODUTO_ID, 0L)
     }
 
     private fun preencheCampos(produtoCarregado: Produto) {
