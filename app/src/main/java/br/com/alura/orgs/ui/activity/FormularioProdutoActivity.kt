@@ -82,5 +82,4 @@ class FormularioProdutoActivity : AppCompatActivity() {
             imagem = url
         )
     }
-
 }
