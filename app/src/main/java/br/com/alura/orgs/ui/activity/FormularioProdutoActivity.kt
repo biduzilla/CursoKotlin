@@ -15,6 +15,7 @@ class FormularioProdutoActivity : AppCompatActivity() {
         ActivityFormularioProdutoBinding.inflate(layoutInflater)
     }
     private var url: String? = null
+    private var idProduto = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,6 +30,19 @@ class FormularioProdutoActivity : AppCompatActivity() {
                     binding.activityFormularioProdutoImagem.tentaCarregarImagem(url)
                 }
         }
+
+        intent.getParcelableExtra<Produto>(CHAVE_PRODUTO)?.let { produtoCarregado ->
+            title = "Alterar Produto"
+            idProduto = produtoCarregado.id
+            url = produtoCarregado.imagem
+
+            with(binding) {
+                activityFormularioProdutoImagem.tentaCarregarImagem(produtoCarregado.imagem)
+                activityFormularioProdutoNome.setText(produtoCarregado.nome)
+                activityFormularioProdutoDescricao.setText(produtoCarregado.descricao)
+                activityFormularioProdutoValor.setText(produtoCarregado.valor.toPlainString())
+            }
+        }
     }
 
     private fun configuraBotaoSalvar() {
@@ -38,7 +52,11 @@ class FormularioProdutoActivity : AppCompatActivity() {
 
         botaoSalvar.setOnClickListener {
             val produtoNovo = criaProduto()
-            produtoDao.salvar(produtoNovo)
+            if (idProduto > 0) {
+                produtoDao.update(produtoNovo)
+            } else {
+                produtoDao.salvar(produtoNovo)
+            }
             finish()
         }
     }
@@ -57,6 +75,7 @@ class FormularioProdutoActivity : AppCompatActivity() {
         }
 
         return Produto(
+            id = idProduto,
             nome = nome,
             descricao = descricao,
             valor = valor,

@@ -1,5 +1,6 @@
 package br.com.alura.orgs.ui.activity
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -38,8 +39,11 @@ class DetalhesProdutoActivity : AppCompatActivity() {
             val produtoDao = db.produtoDao()
             when (item.itemId) {
                 R.id.menu_editar -> {
-                    Toast.makeText(this, "Editar", Toast.LENGTH_SHORT).show()
-                    Log.i("infoteste", "editar")
+                    Intent(this, FormularioProdutoActivity::class.java).apply {
+                        putExtra(CHAVE_PRODUTO, produto)
+                        startActivity(this)
+                    }
+
                 }
                 R.id.menu_deletar -> {
                     produtoDao.remove(produto)
